@@ -3,104 +3,112 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>25-Month Member Payment Ledger</title>
+    <title>Pro Executive Ledger (Nov 2026 - Nov 2028)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #1e293b; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #475569; border-radius: 4px; }
+    </style>
 </head>
-<body class="bg-slate-900 text-slate-100 min-h-screen pb-12">
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col font-sans">
 
     <!-- Header -->
-    <header class="bg-slate-800 border-b border-slate-700 sticky top-0 z-30 shadow-lg">
-        <div class="max-w-7xl mx-auto px-4 py-4 flex flex-wrap items-center justify-between gap-4">
+    <header class="bg-slate-900 border-b border-slate-800 sticky top-0 z-30 shadow-xl">
+        <div class="max-w-7xl mx-auto px-4 py-3.5 flex flex-wrap items-center justify-between gap-4">
             <div class="flex items-center space-x-3">
-                <div class="p-2.5 bg-indigo-600 rounded-xl text-white shadow-lg shadow-indigo-500/30">
-                    <i class="fa-solid me-2 fa-wallet text-xl"></i>
+                <div class="p-2.5 bg-gradient-to-tr from-indigo-600 to-violet-500 rounded-xl text-white shadow-lg shadow-indigo-500/20">
+                    <i class="fa-solid fa-calculator text-xl"></i>
                 </div>
                 <div>
-                    <h1 class="text-xl font-bold text-white tracking-wide">Ledger Pro Manager</h1>
-                    <p class="text-xs text-slate-400">25-Month Multi-Member Payment System</p>
+                    <h1 class="text-lg font-bold text-white tracking-wide">Executive Ledger System</h1>
+                    <p class="text-xs text-slate-400">Nov 2026 – Nov 2028 (25 Months)</p>
                 </div>
             </div>
             <div class="flex items-center space-x-2">
-                <button onclick="openManageMembersModal()" class="px-3.5 py-2 bg-slate-700 hover:bg-slate-600 text-slate-200 text-sm font-medium rounded-lg transition flex items-center gap-2">
+                <button onclick="toggleCalculator()" class="px-3.5 py-2 bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-400 border border-indigo-500/30 text-xs font-semibold rounded-lg transition flex items-center gap-2">
+                    <i class="fa-solid fa-calculator"></i> Calc
+                </button>
+                <button onclick="openManageMembersModal()" class="px-3.5 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold rounded-lg border border-slate-700 transition flex items-center gap-2">
                     <i class="fa-solid fa-users-gear"></i> Members (25 Max)
                 </button>
-                <button onclick="exportToExcel()" class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-medium rounded-lg shadow-md transition flex items-center gap-2">
+                <button onclick="exportToExcel()" class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold rounded-lg shadow-md transition flex items-center gap-2">
                     <i class="fa-solid fa-file-excel"></i> Export Excel
                 </button>
             </div>
         </div>
     </header>
 
-    <main class="max-w-7xl mx-auto px-4 py-6 space-y-6">
+    <main class="max-w-7xl mx-auto px-4 py-6 space-y-6 flex-1 w-full">
 
         <!-- Month Filter & Actions -->
-        <div class="bg-slate-800 p-4 rounded-xl border border-slate-700 flex flex-wrap items-center justify-between gap-4">
+        <div class="bg-slate-900 p-4 rounded-xl border border-slate-800 flex flex-wrap items-center justify-between gap-4 shadow-sm">
             <div class="flex items-center space-x-3">
                 <i class="fa-solid fa-calendar-days text-indigo-400 text-lg"></i>
-                <label class="text-sm font-medium text-slate-300">Select Month (25 Months Working):</label>
-                <select id="monthFilter" onchange="renderDashboard()" class="bg-slate-900 border border-slate-600 text-white rounded-lg px-3 py-1.5 text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
-                    <!-- Populated dynamically via JS -->
+                <label class="text-xs font-medium text-slate-300">Working Period:</label>
+                <select id="monthFilter" onchange="renderDashboard()" class="bg-slate-950 border border-slate-700 text-white rounded-lg px-3 py-1.5 text-xs focus:ring-2 focus:ring-indigo-500 outline-none">
+                    <!-- Dynamic Options: Nov 2026 to Nov 2028 -->
                 </select>
             </div>
-            <button onclick="openAddTransactionModal()" class="w-full sm:w-auto px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white font-medium text-sm rounded-lg shadow-lg shadow-indigo-600/30 transition flex items-center justify-center gap-2">
-                <i class="fa-solid fa-plus-circle"></i> Add Payment / Entry
+            <button onclick="openAddTxModal()" class="w-full sm:w-auto px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white font-medium text-xs rounded-lg shadow-lg shadow-indigo-600/25 transition flex items-center justify-center gap-2">
+                <i class="fa-solid fa-plus"></i> Add Transaction
             </button>
         </div>
 
         <!-- Dashboard Overall Stats -->
         <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div class="bg-slate-800 p-4 rounded-xl border border-slate-700">
-                <div class="text-slate-400 text-xs font-semibold uppercase tracking-wider">Total Monthly Target</div>
+            <div class="bg-slate-900 p-4 rounded-xl border border-slate-800">
+                <div class="text-slate-400 text-[11px] font-semibold uppercase tracking-wider">Total Monthly Target</div>
                 <div class="text-2xl font-bold text-white mt-1" id="statTarget">PKR 0</div>
                 <div class="text-xs text-slate-500 mt-1" id="statMemberCount">0 Active Members</div>
             </div>
-            <div class="bg-slate-800 p-4 rounded-xl border border-slate-700">
-                <div class="text-emerald-400 text-xs font-semibold uppercase tracking-wider">Total Received (IN)</div>
+            <div class="bg-slate-900 p-4 rounded-xl border border-slate-800">
+                <div class="text-emerald-400 text-[11px] font-semibold uppercase tracking-wider">Total Received (IN)</div>
                 <div class="text-2xl font-bold text-emerald-400 mt-1" id="statReceived">PKR 0</div>
-                <div class="text-xs text-slate-400 mt-1" id="statReceivedCount">0 Transactions</div>
+                <div class="text-xs text-slate-500 mt-1" id="statReceivedCount">0 IN Entries</div>
             </div>
-            <div class="bg-slate-800 p-4 rounded-xl border border-slate-700">
-                <div class="text-rose-400 text-xs font-semibold uppercase tracking-wider">Total Paid Out (OUT)</div>
+            <div class="bg-slate-900 p-4 rounded-xl border border-slate-800">
+                <div class="text-rose-400 text-[11px] font-semibold uppercase tracking-wider">Total Paid Out (OUT)</div>
                 <div class="text-2xl font-bold text-rose-400 mt-1" id="statPaidOut">PKR 0</div>
-                <div class="text-xs text-slate-400 mt-1" id="statOutCount">0 Transactions</div>
+                <div class="text-xs text-slate-500 mt-1" id="statOutCount">0 OUT Entries</div>
             </div>
-            <div class="bg-slate-800 p-4 rounded-xl border border-slate-700">
-                <div class="text-amber-400 text-xs font-semibold uppercase tracking-wider">Total Balance Remaining</div>
+            <div class="bg-slate-900 p-4 rounded-xl border border-slate-800">
+                <div class="text-amber-400 text-[11px] font-semibold uppercase tracking-wider">Net Remaining Balance</div>
                 <div class="text-2xl font-bold text-amber-400 mt-1" id="statBalance">PKR 0</div>
-                <div class="text-xs text-slate-400 mt-1" id="statPendingCount">0 Members Pending</div>
+                <div class="text-xs text-slate-500 mt-1" id="statPendingCount">0 Pending</div>
             </div>
         </div>
 
         <!-- Payment Channels Breakdown -->
-        <div class="bg-slate-800 p-5 rounded-xl border border-slate-700">
-            <h2 class="text-sm font-semibold text-slate-300 uppercase tracking-wide mb-3">Payment Channel Breakdown (Selected Month)</h2>
+        <div class="bg-slate-900 p-5 rounded-xl border border-slate-800">
+            <h2 class="text-xs font-bold text-slate-300 uppercase tracking-wider mb-3">Channel Wise Payment Breakdown (Selected Month)</h2>
             <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3 text-center" id="channelBreakdown">
-                <!-- Populated via JS -->
+                <!-- Channels Dynamic -->
             </div>
         </div>
 
         <!-- Members Summary Grid -->
         <div>
-            <div class="flex justify-between items-center mb-4">
-                <h2 class="text-lg font-bold text-white">Per Member Monthly Summary</h2>
-                <span class="text-xs text-slate-400">Click any member card for individual ledger statement</span>
+            <div class="flex justify-between items-center mb-3">
+                <h2 class="text-base font-bold text-white">Member Status Summary</h2>
+                <span class="text-xs text-slate-400">Default Target: PKR 0</span>
             </div>
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="membersGrid">
-                <!-- Member Cards Generated Dynamically -->
+                <!-- Member Cards -->
             </div>
         </div>
 
         <!-- Recent Transactions Table -->
-        <div class="bg-slate-800 rounded-xl border border-slate-700 overflow-hidden">
-            <div class="p-4 border-b border-slate-700 flex justify-between items-center">
-                <h3 class="font-bold text-white">Selected Month Transactions</h3>
+        <div class="bg-slate-900 rounded-xl border border-slate-800 overflow-hidden shadow-sm">
+            <div class="p-4 border-b border-slate-800 flex justify-between items-center">
+                <h3 class="font-bold text-white text-sm">Transactions Log (Selected Month)</h3>
                 <span class="text-xs text-slate-400" id="txCount">0 Entries</span>
             </div>
-            <div class="overflow-x-auto">
-                <table class="w-full text-left text-sm text-slate-300">
-                    <thead class="bg-slate-900 text-slate-400 text-xs uppercase">
+            <div class="overflow-x-auto custom-scrollbar">
+                <table class="w-full text-left text-xs text-slate-300">
+                    <thead class="bg-slate-950 text-slate-400 font-semibold uppercase">
                         <tr>
                             <th class="p-3">Date</th>
                             <th class="p-3">Member</th>
@@ -108,125 +116,157 @@
                             <th class="p-3">Channel</th>
                             <th class="p-3">Amount</th>
                             <th class="p-3">Notes</th>
-                            <th class="p-3 text-right">Action</th>
+                            <th class="p-3 text-right">Actions</th>
                         </tr>
                     </thead>
-                    <tbody id="txTableBody" class="divide-y divide-slate-700">
-                        <!-- Populated via JS -->
+                    <tbody id="txTableBody" class="divide-y divide-slate-800/60">
+                        <!-- Dynamic Tx Rows -->
                     </tbody>
                 </table>
             </div>
         </div>
     </main>
 
-    <!-- Modal: Add Transaction -->
-    <div id="addTxModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4">
-        <div class="bg-slate-800 border border-slate-700 w-full max-w-md rounded-xl p-6 shadow-2xl">
-            <div class="flex justify-between items-center mb-4 border-b border-slate-700 pb-3">
-                <h3 class="text-lg font-bold text-white">Add New Transaction</h3>
-                <button onclick="closeAddTransactionModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+    <!-- Floating Calculator -->
+    <div id="calculatorModal" class="fixed bottom-6 right-6 z-50 hidden bg-slate-900 border border-slate-700 w-72 rounded-2xl p-4 shadow-2xl">
+        <div class="flex justify-between items-center mb-3">
+            <span class="text-xs font-bold text-slate-300"><i class="fa-solid fa-calculator me-1"></i> Calculator</span>
+            <button onclick="toggleCalculator()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <input type="text" id="calcDisplay" readonly value="0" class="w-full bg-slate-950 border border-slate-800 text-right text-lg font-mono text-emerald-400 px-3 py-2 rounded-lg mb-3 outline-none">
+        <div class="grid grid-cols-4 gap-2 text-xs font-bold">
+            <button onclick="calcClear()" class="col-span-2 bg-rose-600/20 text-rose-400 p-2 rounded-lg hover:bg-rose-600/30">C</button>
+            <button onclick="calcOp('/')" class="bg-slate-800 text-indigo-400 p-2 rounded-lg hover:bg-slate-700">÷</button>
+            <button onclick="calcOp('*')" class="bg-slate-800 text-indigo-400 p-2 rounded-lg hover:bg-slate-700">×</button>
+            <button onclick="calcNum('7')" class="bg-slate-800 text-slate-200 p-2 rounded-lg hover:bg-slate-700">7</button>
+            <button onclick="calcNum('8')" class="bg-slate-800 text-slate-200 p-2 rounded-lg hover:bg-slate-700">8</button>
+            <button onclick="calcNum('9')" class="bg-slate-800 text-slate-200 p-2 rounded-lg hover:bg-slate-700">9</button>
+            <button onclick="calcOp('-')" class="bg-slate-800 text-indigo-400 p-2 rounded-lg hover:bg-slate-700">-</button>
+            <button onclick="calcNum('4')" class="bg-slate-800 text-slate-200 p-2 rounded-lg hover:bg-slate-700">4</button>
+            <button onclick="calcNum('5')" class="bg-slate-800 text-slate-200 p-2 rounded-lg hover:bg-slate-700">5</button>
+            <button onclick="calcNum('6')" class="bg-slate-800 text-slate-200 p-2 rounded-lg hover:bg-slate-700">6</button>
+            <button onclick="calcOp('+')" class="bg-slate-800 text-indigo-400 p-2 rounded-lg hover:bg-slate-700">+</button>
+            <button onclick="calcNum('1')" class="bg-slate-800 text-slate-200 p-2 rounded-lg hover:bg-slate-700">1</button>
+            <button onclick="calcNum('2')" class="bg-slate-800 text-slate-200 p-2 rounded-lg hover:bg-slate-700">2</button>
+            <button onclick="calcNum('3')" class="bg-slate-800 text-slate-200 p-2 rounded-lg hover:bg-slate-700">3</button>
+            <button onclick="calcEquals()" class="row-span-2 bg-indigo-600 text-white p-2 rounded-lg hover:bg-indigo-500 flex items-center justify-center">=</button>
+            <button onclick="calcNum('0')" class="col-span-2 bg-slate-800 text-slate-200 p-2 rounded-lg hover:bg-slate-700">0</button>
+            <button onclick="calcNum('.')" class="bg-slate-800 text-slate-200 p-2 rounded-lg hover:bg-slate-700">.</button>
+        </div>
+    </div>
+
+    <!-- Modal: Add / Edit Transaction -->
+    <div id="txModal" class="fixed inset-0 bg-black/75 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4">
+        <div class="bg-slate-900 border border-slate-800 w-full max-w-md rounded-2xl p-6 shadow-2xl">
+            <div class="flex justify-between items-center mb-4 border-b border-slate-800 pb-3">
+                <h3 class="text-base font-bold text-white" id="txModalTitle">Add Transaction</h3>
+                <button onclick="closeTxModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
             </div>
-            <form id="txForm" onsubmit="saveTransaction(event)" class="space-y-4">
+            <form id="txForm" onsubmit="saveTx(event)" class="space-y-4">
+                <input type="hidden" id="editTxId">
                 <div>
-                    <label class="block text-xs font-semibold text-slate-300 mb-1">Member Name</label>
-                    <select id="txMember" required class="w-full bg-slate-900 border border-slate-600 rounded-lg p-2 text-white text-sm">
-                        <!-- Member Options -->
+                    <label class="block text-xs font-semibold text-slate-300 mb-1">Select Member</label>
+                    <select id="txMember" required class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2.5 text-white text-xs outline-none focus:border-indigo-500">
                     </select>
                 </div>
                 <div class="grid grid-cols-2 gap-3">
                     <div>
-                        <label class="block text-xs font-semibold text-slate-300 mb-1">Transaction Type</label>
-                        <select id="txType" required class="w-full bg-slate-900 border border-slate-600 rounded-lg p-2 text-white text-sm">
+                        <label class="block text-xs font-semibold text-slate-300 mb-1">Type</label>
+                        <select id="txType" required class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2.5 text-white text-xs outline-none focus:border-indigo-500">
                             <option value="IN">Payment IN (Received)</option>
-                            <option value="OUT">Payment OUT (Expense/Return)</option>
+                            <option value="OUT">Payment OUT (Paid)</option>
                         </select>
                     </div>
                     <div>
                         <label class="block text-xs font-semibold text-slate-300 mb-1">Date</label>
-                        <input type="date" id="txDate" required class="w-full bg-slate-900 border border-slate-600 rounded-lg p-2 text-white text-sm">
+                        <input type="date" id="txDate" required class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2.5 text-white text-xs outline-none focus:border-indigo-500">
                     </div>
                 </div>
                 <div>
-                    <label class="block text-xs font-semibold text-slate-300 mb-1">Payment Method / Channel</label>
-                    <select id="txChannel" required class="w-full bg-slate-900 border border-slate-600 rounded-lg p-2 text-white text-sm">
+                    <label class="block text-xs font-semibold text-slate-300 mb-1">Channel / Method</label>
+                    <select id="txChannel" required class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2.5 text-white text-xs outline-none focus:border-indigo-500">
                         <option value="Cash">Cash</option>
                         <option value="JazzCash">JazzCash</option>
                         <option value="EasyPaisa">EasyPaisa</option>
-                        <option value="Bank 1">Bank Account 1</option>
-                        <option value="Bank 2">Bank Account 2</option>
-                        <option value="Bank 3">Bank Account 3</option>
-                        <option value="Bank 4">Bank Account 4</option>
+                        <option value="Bank 1">Bank 1</option>
+                        <option value="Bank 2">Bank 2</option>
+                        <option value="Bank 3">Bank 3</option>
+                        <option value="Bank 4">Bank 4</option>
                     </select>
                 </div>
                 <div>
                     <label class="block text-xs font-semibold text-slate-300 mb-1">Amount (PKR)</label>
-                    <input type="number" id="txAmount" min="1" required placeholder="e.g. 5000" class="w-full bg-slate-900 border border-slate-600 rounded-lg p-2 text-white text-sm">
+                    <input type="number" id="txAmount" min="1" required placeholder="0" class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2.5 text-white text-xs outline-none focus:border-indigo-500">
                 </div>
                 <div>
-                    <label class="block text-xs font-semibold text-slate-300 mb-1">Remarks / Note (Optional)</label>
-                    <input type="text" id="txNote" placeholder="Monthly fee, slip no, etc." class="w-full bg-slate-900 border border-slate-600 rounded-lg p-2 text-white text-sm">
+                    <label class="block text-xs font-semibold text-slate-300 mb-1">Remarks / Note</label>
+                    <input type="text" id="txNote" placeholder="Optional details..." class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2.5 text-white text-xs outline-none focus:border-indigo-500">
                 </div>
-                <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-medium py-2 rounded-lg transition shadow-lg shadow-indigo-600/30">Save Transaction</button>
+                <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-medium py-2.5 rounded-lg text-xs transition shadow-lg shadow-indigo-600/25">Save Entry</button>
             </form>
         </div>
     </div>
 
-    <!-- Modal: Manage Members (Up to 25) -->
-    <div id="manageMembersModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4">
-        <div class="bg-slate-800 border border-slate-700 w-full max-w-lg rounded-xl p-6 shadow-2xl">
-            <div class="flex justify-between items-center mb-4 border-b border-slate-700 pb-3">
-                <h3 class="text-lg font-bold text-white">Manage Members (Max 25)</h3>
-                <button onclick="closeManageMembersModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+    <!-- Modal: Manage Members -->
+    <div id="manageMembersModal" class="fixed inset-0 bg-black/75 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4">
+        <div class="bg-slate-900 border border-slate-800 w-full max-w-lg rounded-2xl p-6 shadow-2xl">
+            <div class="flex justify-between items-center mb-4 border-b border-slate-800 pb-3">
+                <h3 class="text-base font-bold text-white">Manage Members (Max 25)</h3>
+                <button onclick="closeManageMembersModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
             </div>
             <div class="space-y-4">
                 <div class="flex gap-2">
-                    <input type="text" id="newMemberName" placeholder="Enter Member Name" class="flex-1 bg-slate-900 border border-slate-600 rounded-lg p-2 text-white text-sm">
-                    <input type="number" id="newMemberTarget" placeholder="Target PKR" class="w-28 bg-slate-900 border border-slate-600 rounded-lg p-2 text-white text-sm">
-                    <button onclick="addNewMember()" class="bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-2 rounded-lg text-sm font-medium"><i class="fa-solid fa-plus"></i> Add</button>
+                    <input type="text" id="newMemberName" placeholder="Member Name" class="flex-1 bg-slate-950 border border-slate-700 rounded-lg p-2 text-white text-xs outline-none">
+                    <input type="number" id="newMemberTarget" placeholder="Target (0)" value="0" class="w-24 bg-slate-950 border border-slate-700 rounded-lg p-2 text-white text-xs outline-none">
+                    <button onclick="addNewMember()" class="bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-2 rounded-lg text-xs font-medium"><i class="fa-solid fa-plus"></i> Add</button>
                 </div>
-                <div class="max-h-60 overflow-y-auto space-y-2 border-t border-slate-700 pt-3" id="membersListModal">
+                <div class="max-h-60 overflow-y-auto custom-scrollbar space-y-2 border-t border-slate-800 pt-3" id="membersListModal">
                     <!-- Dynamic List -->
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Footer Branding -->
-    <footer class="text-center text-xs text-slate-500 mt-12">
+    <!-- Footer -->
+    <footer class="text-center text-xs text-slate-500 py-4 border-t border-slate-900">
         Powered by USMAN QURESHI with GEMINI
     </footer>
 
     <script>
-        // Initial 6 Default Members
+        // Initial 6 Default Members with 0 Monthly Target
         const defaultMembers = [
-            { id: '1', name: 'Hasham', monthlyTarget: 5000 },
-            { id: '2', name: 'Waleed', monthlyTarget: 5000 },
-            { id: '3', name: 'Shan', monthlyTarget: 5000 },
-            { id: '4', name: 'Asad', monthlyTarget: 5000 },
-            { id: '5', name: 'Abdul', monthlyTarget: 5000 },
-            { id: '6', name: 'Shehroz', monthlyTarget: 5000 }
+            { id: '1', name: 'Hasham', monthlyTarget: 0 },
+            { id: '2', name: 'Waleed', monthlyTarget: 0 },
+            { id: '3', name: 'Shan', monthlyTarget: 0 },
+            { id: '4', name: 'Asad', monthlyTarget: 0 },
+            { id: '5', name: 'Abdul', monthlyTarget: 0 },
+            { id: '6', name: 'Shehroz', monthlyTarget: 0 }
         ];
 
         let members = JSON.parse(localStorage.getItem('ledger_members')) || defaultMembers;
         let transactions = JSON.parse(localStorage.getItem('ledger_transactions')) || [];
 
-        // Generate 25 Months Dropdown (Current month + past 24 months)
+        // Generate 25 Months Dropdown: Nov 2026 to Nov 2028
         function initMonthDropdown() {
             const select = document.getElementById('monthFilter');
             select.innerHTML = '';
-            const today = new Date();
+            
+            const startDate = new Date(2026, 10, 1); // Nov 2026
+            const endDate = new Date(2028, 10, 1);   // Nov 2028 (25 months total)
 
-            for (let i = 0; i < 25; i++) {
-                const d = new Date(today.getFullYear(), today.getMonth() - i, 1);
-                const year = d.getFullYear();
-                const month = String(d.getMonth() + 1).padStart(2, '0');
+            let curr = new Date(endDate);
+            while (curr >= startDate) {
+                const year = curr.getFullYear();
+                const month = String(curr.getMonth() + 1).padStart(2, '0');
                 const value = `${year}-${month}`;
-                const label = d.toLocaleString('default', { month: 'long', year: 'numeric' });
+                const label = curr.toLocaleString('default', { month: 'long', year: 'numeric' });
                 
                 const option = document.createElement('option');
                 option.value = value;
                 option.textContent = label;
                 select.appendChild(option);
+
+                curr.setMonth(curr.getMonth() - 1);
             }
         }
 
@@ -240,12 +280,12 @@
             const selectedMonth = document.getElementById('monthFilter').value;
             const currentTx = transactions.filter(t => t.date.startsWith(selectedMonth));
 
-            // Populate Members Dropdown in Add Tx Modal
+            // Populate Members Dropdown in Modal
             const memberSelect = document.getElementById('txMember');
             memberSelect.innerHTML = members.map(m => `<option value="${m.id}">${m.name}</option>`).join('');
 
-            // Totals
-            let totalTarget = members.length * 5000; // or sum of individual targets
+            // Calculate Totals
+            let totalTarget = members.reduce((acc, m) => acc + Number(m.monthlyTarget || 0), 0);
             let totalReceived = 0;
             let totalPaidOut = 0;
 
@@ -263,22 +303,22 @@
                 }
             });
 
-            const totalBalance = totalTarget - totalReceived;
+            const netBalance = totalTarget - totalReceived;
 
             document.getElementById('statTarget').textContent = `PKR ${totalTarget.toLocaleString()}`;
-            document.getElementById('statMemberCount').textContent = `${members.length} Active Members`;
+            document.getElementById('statMemberCount').textContent = `${members.length} Members Active`;
             document.getElementById('statReceived').textContent = `PKR ${totalReceived.toLocaleString()}`;
-            document.getElementById('statReceivedCount').textContent = `${currentTx.filter(t=>t.type==='IN').length} Payments In`;
+            document.getElementById('statReceivedCount').textContent = `${currentTx.filter(t=>t.type==='IN').length} IN Entries`;
             document.getElementById('statPaidOut').textContent = `PKR ${totalPaidOut.toLocaleString()}`;
-            document.getElementById('statOutCount').textContent = `${currentTx.filter(t=>t.type==='OUT').length} Payments Out`;
-            document.getElementById('statBalance').textContent = `PKR ${totalBalance.toLocaleString()}`;
+            document.getElementById('statOutCount').textContent = `${currentTx.filter(t=>t.type==='OUT').length} OUT Entries`;
+            document.getElementById('statBalance').textContent = `PKR ${netBalance.toLocaleString()}`;
 
             // Render Channels
             const channelContainer = document.getElementById('channelBreakdown');
             channelContainer.innerHTML = Object.entries(channelTotals).map(([ch, val]) => `
-                <div class="bg-slate-900/60 p-2.5 rounded-lg border border-slate-700/60">
-                    <div class="text-[11px] text-slate-400 truncate">${ch}</div>
-                    <div class="text-sm font-bold text-indigo-400 mt-0.5">PKR ${val.toLocaleString()}</div>
+                <div class="bg-slate-950 p-2.5 rounded-lg border border-slate-800">
+                    <div class="text-[10px] text-slate-400">${ch}</div>
+                    <div class="text-xs font-bold text-indigo-400 mt-0.5">PKR ${val.toLocaleString()}</div>
                 </div>
             `).join('');
 
@@ -287,24 +327,19 @@
             grid.innerHTML = members.map(m => {
                 const mTx = currentTx.filter(t => t.memberId === m.id);
                 const received = mTx.filter(t => t.type === 'IN').reduce((acc, c) => acc + Number(c.amount), 0);
-                const out = mTx.filter(t => t.type === 'OUT').reduce((acc, c) => acc + Number(c.amount), 0);
-                const target = m.monthlyTarget || 5000;
+                const target = m.monthlyTarget || 0;
                 const rem = target - received;
-                
-                let statusBadge = `<span class="px-2 py-0.5 text-[10px] bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 rounded">Paid</span>`;
-                if(rem > 0 && received > 0) statusBadge = `<span class="px-2 py-0.5 text-[10px] bg-amber-500/20 text-amber-400 border border-amber-500/30 rounded">Partial</span>`;
-                else if(rem === target) statusBadge = `<span class="px-2 py-0.5 text-[10px] bg-rose-500/20 text-rose-400 border border-rose-500/30 rounded">Pending</span>`;
 
                 return `
-                    <div class="bg-slate-800 p-4 rounded-xl border border-slate-700 hover:border-slate-600 transition">
-                        <div class="flex justify-between items-start mb-2">
-                            <h3 class="font-bold text-white text-base">${m.name}</h3>
-                            ${statusBadge}
+                    <div class="bg-slate-900 p-4 rounded-xl border border-slate-800">
+                        <div class="flex justify-between items-center mb-2">
+                            <h3 class="font-bold text-white text-sm">${m.name}</h3>
+                            <button onclick="editMemberTarget('${m.id}')" class="text-slate-500 hover:text-indigo-400 text-xs"><i class="fa-solid fa-pen"></i> Target</button>
                         </div>
-                        <div class="grid grid-cols-3 gap-2 text-center bg-slate-900/40 p-2 rounded-lg my-3 text-xs">
+                        <div class="grid grid-cols-3 gap-2 text-center bg-slate-950 p-2 rounded-lg my-2 text-xs">
                             <div>
-                                <span class="text-slate-400 block text-[10px]">Target</span>
-                                <span class="font-semibold text-slate-200">Rs ${target.toLocaleString()}</span>
+                                <span class="text-slate-500 block text-[10px]">Target</span>
+                                <span class="font-semibold text-slate-300">Rs ${target.toLocaleString()}</span>
                             </div>
                             <div>
                                 <span class="text-emerald-400 block text-[10px]">Received</span>
@@ -319,44 +354,62 @@
                 `;
             }).join('');
 
-            // Render Table
+            // Render Transactions Table
             const tbody = document.getElementById('txTableBody');
             document.getElementById('txCount').textContent = `${currentTx.length} Entries`;
             tbody.innerHTML = currentTx.map(t => {
                 const member = members.find(m => m.id === t.memberId);
                 const isIN = t.type === 'IN';
                 return `
-                    <tr class="hover:bg-slate-750">
-                        <td class="p-3 text-xs text-slate-400">${t.date}</td>
+                    <tr class="hover:bg-slate-800/40">
+                        <td class="p-3 text-slate-400">${t.date}</td>
                         <td class="p-3 font-medium text-white">${member ? member.name : 'Unknown'}</td>
                         <td class="p-3">
-                            <span class="px-2 py-0.5 text-[11px] font-semibold rounded ${isIN ? 'bg-emerald-500/20 text-emerald-400' : 'bg-rose-500/20 text-rose-400'}">
+                            <span class="px-2 py-0.5 text-[10px] font-semibold rounded ${isIN ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-rose-500/10 text-rose-400 border border-rose-500/20'}">
                                 ${t.type}
                             </span>
                         </td>
-                        <td class="p-3 text-slate-300 text-xs">${t.channel}</td>
-                        <td class="p-3 font-semibold ${isIN ? 'text-emerald-400' : 'text-rose-400'}">PKR ${Number(t.amount).toLocaleString()}</td>
-                        <td class="p-3 text-slate-400 text-xs">${t.note || '-'}</td>
-                        <td class="p-3 text-right">
-                            <button onclick="deleteTx('${t.id}')" class="text-slate-500 hover:text-rose-400 transition"><i class="fa-solid fa-trash"></i></button>
+                        <td class="p-3 text-slate-300">${t.channel}</td>
+                        <td class="p-3 font-bold ${isIN ? 'text-emerald-400' : 'text-rose-400'}">PKR ${Number(t.amount).toLocaleString()}</td>
+                        <td class="p-3 text-slate-400">${t.note || '-'}</td>
+                        <td class="p-3 text-right space-x-2">
+                            <button onclick="openEditTxModal('${t.id}')" class="text-slate-400 hover:text-indigo-400"><i class="fa-solid fa-pen-to-square"></i></button>
+                            <button onclick="deleteTx('${t.id}')" class="text-slate-400 hover:text-rose-400"><i class="fa-solid fa-trash"></i></button>
                         </td>
                     </tr>
                 `;
             }).join('');
         }
 
-        // Add Transaction
-        function openAddTransactionModal() {
+        // Add / Edit Transaction
+        function openAddTxModal() {
+            document.getElementById('editTxId').value = '';
+            document.getElementById('txModalTitle').textContent = 'Add Transaction';
             document.getElementById('txDate').value = new Date().toISOString().split('T')[0];
-            document.getElementById('addTxModal').classList.remove('hidden');
+            document.getElementById('txForm').reset();
+            document.getElementById('txModal').classList.remove('hidden');
         }
-        function closeAddTransactionModal() {
-            document.getElementById('addTxModal').classList.add('hidden');
+        function openEditTxModal(id) {
+            const tx = transactions.find(t => t.id === id);
+            if(!tx) return;
+            document.getElementById('editTxId').value = tx.id;
+            document.getElementById('txModalTitle').textContent = 'Edit Transaction';
+            document.getElementById('txMember').value = tx.memberId;
+            document.getElementById('txType').value = tx.type;
+            document.getElementById('txDate').value = tx.date;
+            document.getElementById('txChannel').value = tx.channel;
+            document.getElementById('txAmount').value = tx.amount;
+            document.getElementById('txNote').value = tx.note || '';
+            document.getElementById('txModal').classList.remove('hidden');
         }
-        function saveTransaction(e) {
+        function closeTxModal() {
+            document.getElementById('txModal').classList.add('hidden');
+        }
+        function saveTx(e) {
             e.preventDefault();
-            const newTx = {
-                id: Date.now().toString(),
+            const editId = document.getElementById('editTxId').value;
+            const txData = {
+                id: editId || Date.now().toString(),
                 memberId: document.getElementById('txMember').value,
                 type: document.getElementById('txType').value,
                 date: document.getElementById('txDate').value,
@@ -364,19 +417,25 @@
                 amount: document.getElementById('txAmount').value,
                 note: document.getElementById('txNote').value
             };
-            transactions.unshift(newTx);
+
+            if(editId) {
+                const idx = transactions.findIndex(t => t.id === editId);
+                if(idx !== -1) transactions[idx] = txData;
+            } else {
+                transactions.unshift(txData);
+            }
+
             saveToStorage();
-            closeAddTransactionModal();
-            document.getElementById('txForm').reset();
+            closeTxModal();
         }
         function deleteTx(id) {
-            if(confirm('Are you sure you want to delete this payment record?')) {
+            if(confirm('Delete this transaction?')) {
                 transactions = transactions.filter(t => t.id !== id);
                 saveToStorage();
             }
         }
 
-        // Manage Members Modal
+        // Manage Members
         function openManageMembersModal() {
             renderMembersModalList();
             document.getElementById('manageMembersModal').classList.remove('hidden');
@@ -387,32 +446,70 @@
         function renderMembersModalList() {
             const list = document.getElementById('membersListModal');
             list.innerHTML = members.map((m, idx) => `
-                <div class="flex items-center justify-between bg-slate-900 p-2.5 rounded-lg border border-slate-700">
-                    <span class="text-sm font-medium text-white">${idx + 1}. ${m.name} (Rs ${m.monthlyTarget || 5000})</span>
-                    ${members.length > 1 ? `<button onclick="removeMember('${m.id}')" class="text-rose-400 text-xs hover:underline">Remove</button>` : ''}
+                <div class="flex items-center justify-between bg-slate-950 p-2.5 rounded-lg border border-slate-800">
+                    <span class="text-xs font-medium text-white">${idx + 1}. ${m.name} (Target: Rs ${m.monthlyTarget || 0})</span>
+                    <div class="space-x-2">
+                        <button onclick="editMemberTarget('${m.id}')" class="text-indigo-400 text-xs hover:underline">Edit Target</button>
+                        ${members.length > 1 ? `<button onclick="removeMember('${m.id}')" class="text-rose-400 text-xs hover:underline">Remove</button>` : ''}
+                    </div>
                 </div>
             `).join('');
         }
         function addNewMember() {
-            if(members.length >= 25) {
-                alert('Maximum 25 members limit reached!');
-                return;
-            }
+            if(members.length >= 25) return alert('Maximum 25 members limit reached!');
             const name = document.getElementById('newMemberName').value.trim();
-            const target = Number(document.getElementById('newMemberTarget').value) || 5000;
+            const target = Number(document.getElementById('newMemberTarget').value) || 0;
             if(!name) return;
 
             members.push({ id: Date.now().toString(), name: name, monthlyTarget: target });
             document.getElementById('newMemberName').value = '';
-            document.getElementById('newMemberTarget').value = '';
+            document.getElementById('newMemberTarget').value = '0';
             renderMembersModalList();
             saveToStorage();
+        }
+        function editMemberTarget(id) {
+            const m = members.find(mem => mem.id === id);
+            if(!m) return;
+            const newTarget = prompt(`Enter new monthly target for ${m.name}:`, m.monthlyTarget || 0);
+            if(newTarget !== null) {
+                m.monthlyTarget = Number(newTarget) || 0;
+                saveToStorage();
+                renderMembersModalList();
+            }
         }
         function removeMember(id) {
             if(confirm('Remove this member?')) {
                 members = members.filter(m => m.id !== id);
                 renderMembersModalList();
                 saveToStorage();
+            }
+        }
+
+        // Floating Calculator Functions
+        function toggleCalculator() {
+            document.getElementById('calculatorModal').classList.toggle('hidden');
+        }
+        let calcVal = '0';
+        function calcNum(n) {
+            if(calcVal === '0') calcVal = n;
+            else calcVal += n;
+            document.getElementById('calcDisplay').value = calcVal;
+        }
+        function calcOp(op) {
+            calcVal += ' ' + op + ' ';
+            document.getElementById('calcDisplay').value = calcVal;
+        }
+        function calcClear() {
+            calcVal = '0';
+            document.getElementById('calcDisplay').value = calcVal;
+        }
+        function calcEquals() {
+            try {
+                calcVal = eval(calcVal.replace(/×/g, '*').replace(/÷/g, '/')).toString();
+                document.getElementById('calcDisplay').value = calcVal;
+            } catch(e) {
+                document.getElementById('calcDisplay').value = 'Error';
+                calcVal = '0';
             }
         }
 
@@ -431,11 +528,11 @@
             });
             const ws = XLSX.utils.json_to_sheet(data);
             const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, "Monthly Ledger");
-            XLSX.writeFile(wb, "Payment_Ledger_25Months.xlsx");
+            XLSX.utils.book_append_sheet(wb, ws, "Ledger");
+            XLSX.writeFile(wb, "Payment_Ledger_Nov2026_Nov2028.xlsx");
         }
 
-        // Init
+        // Init App
         initMonthDropdown();
         renderDashboard();
     </script>
