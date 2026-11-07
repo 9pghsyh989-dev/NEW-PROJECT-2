@@ -1,650 +1,443 @@
 <!DOCTYPE html>
-<html lang="en" class="h-full bg-slate-900 text-slate-100">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Member Payment Tracker</title>
-    <!-- Tailwind CSS CDN -->
+    <title>25-Month Member Payment Ledger</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- FontAwesome Icons CDN -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Google Font (Inter) -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <!-- SheetJS for Excel Export -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <style>
-        body { font-family: 'Inter', sans-serif; }
-        ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-track { background: #1e293b; }
-        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: #475569; }
-    </style>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
 </head>
-<body class="flex flex-col min-h-screen bg-slate-900 text-slate-100 pb-12">
+<body class="bg-slate-900 text-slate-100 min-h-screen pb-12">
 
-    <!-- Top Navigation Header -->
-    <header class="sticky top-0 z-30 bg-slate-800/95 backdrop-blur border-b border-slate-700/80 px-4 py-3 shadow-lg">
-        <div class="max-w-6xl mx-auto flex items-center justify-between">
+    <!-- Header -->
+    <header class="bg-slate-800 border-b border-slate-700 sticky top-0 z-30 shadow-lg">
+        <div class="max-w-7xl mx-auto px-4 py-4 flex flex-wrap items-center justify-between gap-4">
             <div class="flex items-center space-x-3">
-                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-500 flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-indigo-500/30">
-                    <i class="fa-solid fa-wallet"></i>
+                <div class="p-2.5 bg-indigo-600 rounded-xl text-white shadow-lg shadow-indigo-500/30">
+                    <i class="fa-solid me-2 fa-wallet text-xl"></i>
                 </div>
                 <div>
-                    <h1 class="font-bold text-lg leading-tight text-white">Payment Tracker</h1>
-                    <p class="text-xs text-slate-400">6 Members Financial Ledger</p>
+                    <h1 class="text-xl font-bold text-white tracking-wide">Ledger Pro Manager</h1>
+                    <p class="text-xs text-slate-400">25-Month Multi-Member Payment System</p>
                 </div>
             </div>
             <div class="flex items-center space-x-2">
-                <button onclick="exportToExcel()" class="bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-2 rounded-xl text-xs font-semibold flex items-center space-x-1.5 transition shadow">
-                    <i class="fa-solid fa-file-excel text-sm"></i>
-                    <span class="hidden sm:inline">Export Excel</span>
+                <button onclick="openManageMembersModal()" class="px-3.5 py-2 bg-slate-700 hover:bg-slate-600 text-slate-200 text-sm font-medium rounded-lg transition flex items-center gap-2">
+                    <i class="fa-solid fa-users-gear"></i> Members (25 Max)
                 </button>
-                <button onclick="openTransactionModal()" class="bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-2 rounded-xl text-xs font-semibold flex items-center space-x-1.5 transition shadow shadow-indigo-500/25">
-                    <i class="fa-solid fa-plus text-sm"></i>
-                    <span>Add Payment</span>
+                <button onclick="exportToExcel()" class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-medium rounded-lg shadow-md transition flex items-center gap-2">
+                    <i class="fa-solid fa-file-excel"></i> Export Excel
                 </button>
             </div>
         </div>
     </header>
 
-    <!-- Main Content Container -->
-    <main class="flex-grow max-w-6xl w-full mx-auto p-4 sm:p-6 space-y-6">
+    <main class="max-w-7xl mx-auto px-4 py-6 space-y-6">
 
-        <!-- Top Overview Cards -->
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <!-- Total Target Card -->
-            <div class="bg-slate-800/90 border border-slate-700/80 rounded-2xl p-4 shadow-sm hover:border-slate-600 transition">
-                <div class="flex justify-between items-start">
-                    <div>
-                        <p class="text-xs font-medium text-slate-400">Total Monthly Target</p>
-                        <h3 id="statTotalTarget" class="text-2xl font-bold text-white mt-1">PKR 0</h3>
-                    </div>
-                    <div class="p-3 bg-indigo-500/10 text-indigo-400 rounded-xl">
-                        <i class="fa-solid fa-bullseye text-xl"></i>
-                    </div>
-                </div>
-                <p class="text-xs text-slate-400 mt-3">Sum of 6 members' monthly dues</p>
+        <!-- Month Filter & Actions -->
+        <div class="bg-slate-800 p-4 rounded-xl border border-slate-700 flex flex-wrap items-center justify-between gap-4">
+            <div class="flex items-center space-x-3">
+                <i class="fa-solid fa-calendar-days text-indigo-400 text-lg"></i>
+                <label class="text-sm font-medium text-slate-300">Select Month (25 Months Working):</label>
+                <select id="monthFilter" onchange="renderDashboard()" class="bg-slate-900 border border-slate-600 text-white rounded-lg px-3 py-1.5 text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
+                    <!-- Populated dynamically via JS -->
+                </select>
             </div>
+            <button onclick="openAddTransactionModal()" class="w-full sm:w-auto px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white font-medium text-sm rounded-lg shadow-lg shadow-indigo-600/30 transition flex items-center justify-center gap-2">
+                <i class="fa-solid fa-plus-circle"></i> Add Payment / Entry
+            </button>
+        </div>
 
-            <!-- Total Received Card -->
-            <div class="bg-slate-800/90 border border-slate-700/80 rounded-2xl p-4 shadow-sm hover:border-slate-600 transition">
-                <div class="flex justify-between items-start">
-                    <div>
-                        <p class="text-xs font-medium text-slate-400">Total Received Net</p>
-                        <h3 id="statTotalReceived" class="text-2xl font-bold text-emerald-400 mt-1">PKR 0</h3>
-                    </div>
-                    <div class="p-3 bg-emerald-500/10 text-emerald-400 rounded-xl">
-                        <i class="fa-solid fa-arrow-down-left text-xl"></i>
-                    </div>
-                </div>
-                <div class="w-full bg-slate-700 h-1.5 rounded-full mt-3 overflow-hidden">
-                    <div id="receivedProgressBar" class="bg-emerald-500 h-full rounded-full transition-all duration-300" style="width: 0%"></div>
-                </div>
+        <!-- Dashboard Overall Stats -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div class="bg-slate-800 p-4 rounded-xl border border-slate-700">
+                <div class="text-slate-400 text-xs font-semibold uppercase tracking-wider">Total Monthly Target</div>
+                <div class="text-2xl font-bold text-white mt-1" id="statTarget">PKR 0</div>
+                <div class="text-xs text-slate-500 mt-1" id="statMemberCount">0 Active Members</div>
             </div>
-
-            <!-- Total Remaining Balance Card -->
-            <div class="bg-slate-800/90 border border-slate-700/80 rounded-2xl p-4 shadow-sm hover:border-slate-600 transition">
-                <div class="flex justify-between items-start">
-                    <div>
-                        <p class="text-xs font-medium text-slate-400">Remaining Dues Balance</p>
-                        <h3 id="statTotalBalance" class="text-2xl font-bold text-amber-400 mt-1">PKR 0</h3>
-                    </div>
-                    <div class="p-3 bg-amber-500/10 text-amber-400 rounded-xl">
-                        <i class="fa-solid fa-hourglass-half text-xl"></i>
-                    </div>
-                </div>
-                <p class="text-xs text-slate-400 mt-3"><span id="statPaidCount">0</span> of 6 members cleared</p>
+            <div class="bg-slate-800 p-4 rounded-xl border border-slate-700">
+                <div class="text-emerald-400 text-xs font-semibold uppercase tracking-wider">Total Received (IN)</div>
+                <div class="text-2xl font-bold text-emerald-400 mt-1" id="statReceived">PKR 0</div>
+                <div class="text-xs text-slate-400 mt-1" id="statReceivedCount">0 Transactions</div>
+            </div>
+            <div class="bg-slate-800 p-4 rounded-xl border border-slate-700">
+                <div class="text-rose-400 text-xs font-semibold uppercase tracking-wider">Total Paid Out (OUT)</div>
+                <div class="text-2xl font-bold text-rose-400 mt-1" id="statPaidOut">PKR 0</div>
+                <div class="text-xs text-slate-400 mt-1" id="statOutCount">0 Transactions</div>
+            </div>
+            <div class="bg-slate-800 p-4 rounded-xl border border-slate-700">
+                <div class="text-amber-400 text-xs font-semibold uppercase tracking-wider">Total Balance Remaining</div>
+                <div class="text-2xl font-bold text-amber-400 mt-1" id="statBalance">PKR 0</div>
+                <div class="text-xs text-slate-400 mt-1" id="statPendingCount">0 Members Pending</div>
             </div>
         </div>
 
-        <!-- Payment Method Breakdown Summary -->
-        <section class="space-y-3">
-            <h2 class="text-sm font-bold text-slate-300 flex items-center gap-2">
-                <i class="fa-solid fa-chart-pie text-indigo-400"></i> Payment Channels Balance Summary
-            </h2>
-            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                <!-- Cash -->
-                <div class="bg-slate-800/60 border border-slate-700/60 rounded-xl p-3">
-                    <div class="flex items-center gap-2 text-slate-400 text-xs mb-1">
-                        <i class="fa-solid fa-money-bill-wave text-emerald-400"></i> Cash
-                    </div>
-                    <p id="channelCashTotal" class="text-base font-bold text-slate-100">PKR 0</p>
-                </div>
-                <!-- JazzCash -->
-                <div class="bg-slate-800/60 border border-slate-700/60 rounded-xl p-3">
-                    <div class="flex items-center gap-2 text-slate-400 text-xs mb-1">
-                        <i class="fa-solid fa-mobile-screen-button text-red-400"></i> JazzCash
-                    </div>
-                    <p id="channelJazzTotal" class="text-base font-bold text-slate-100">PKR 0</p>
-                </div>
-                <!-- EasyPaisa -->
-                <div class="bg-slate-800/60 border border-slate-700/60 rounded-xl p-3">
-                    <div class="flex items-center gap-2 text-slate-400 text-xs mb-1">
-                        <i class="fa-solid fa-wallet text-emerald-300"></i> EasyPaisa
-                    </div>
-                    <p id="channelEasyTotal" class="text-base font-bold text-slate-100">PKR 0</p>
-                </div>
-                <!-- Bank Accounts -->
-                <div class="bg-slate-800/60 border border-slate-700/60 rounded-xl p-3">
-                    <div class="flex items-center gap-2 text-slate-400 text-xs mb-1">
-                        <i class="fa-solid fa-building-columns text-blue-400"></i> Total Banks
-                    </div>
-                    <p id="channelBankTotal" class="text-base font-bold text-slate-100">PKR 0</p>
-                </div>
+        <!-- Payment Channels Breakdown -->
+        <div class="bg-slate-800 p-5 rounded-xl border border-slate-700">
+            <h2 class="text-sm font-semibold text-slate-300 uppercase tracking-wide mb-3">Payment Channel Breakdown (Selected Month)</h2>
+            <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3 text-center" id="channelBreakdown">
+                <!-- Populated via JS -->
             </div>
-        </section>
+        </div>
 
-        <!-- Members Summary Section (6 Members) -->
-        <section class="space-y-3">
-            <div class="flex justify-between items-center">
-                <h2 class="text-base font-bold text-slate-200 flex items-center gap-2">
-                    <i class="fa-solid fa-users text-indigo-400"></i> Members Status (6)
-                </h2>
-                <button onclick="openManageMembersModal()" class="text-xs text-indigo-400 hover:text-indigo-300 font-semibold underline">
-                    Edit Dues Target
-                </button>
+        <!-- Members Summary Grid -->
+        <div>
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-lg font-bold text-white">Per Member Monthly Summary</h2>
+                <span class="text-xs text-slate-400">Click any member card for individual ledger statement</span>
             </div>
-
-            <div id="membersGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                <!-- Member Cards dynamically inserted -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="membersGrid">
+                <!-- Member Cards Generated Dynamically -->
             </div>
-        </section>
+        </div>
 
-        <!-- Transactions History & Filter Table -->
-        <section class="bg-slate-800 border border-slate-700/80 rounded-2xl p-4 sm:p-5 shadow-sm space-y-4">
-            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-                <h2 class="text-base font-bold text-slate-200 flex items-center gap-2">
-                    <i class="fa-solid fa-receipt text-indigo-400"></i> Payment History Log
-                </h2>
-
-                <!-- Filters -->
-                <div class="flex flex-wrap gap-2 w-full sm:w-auto">
-                    <select id="filterMember" onchange="renderTransactions()" class="bg-slate-900 border border-slate-700 text-xs rounded-lg p-2 text-slate-300 focus:outline-none focus:border-indigo-500">
-                        <option value="ALL">All Members</option>
-                    </select>
-                    <select id="filterMethod" onchange="renderTransactions()" class="bg-slate-900 border border-slate-700 text-xs rounded-lg p-2 text-slate-300 focus:outline-none focus:border-indigo-500">
-                        <option value="ALL">All Payment Channels</option>
-                        <option value="Cash">Cash</option>
-                        <option value="JazzCash">JazzCash</option>
-                        <option value="EasyPaisa">EasyPaisa</option>
-                        <option value="Bank Account 1">Bank Account 1</option>
-                        <option value="Bank Account 2">Bank Account 2</option>
-                        <option value="Bank Account 3">Bank Account 3</option>
-                        <option value="Bank Account 4">Bank Account 4</option>
-                    </select>
-                    <select id="filterType" onchange="renderTransactions()" class="bg-slate-900 border border-slate-700 text-xs rounded-lg p-2 text-slate-300 focus:outline-none focus:border-indigo-500">
-                        <option value="ALL">All Types (IN/OUT)</option>
-                        <option value="IN">Payment IN</option>
-                        <option value="OUT">Payment OUT</option>
-                    </select>
-                </div>
+        <!-- Recent Transactions Table -->
+        <div class="bg-slate-800 rounded-xl border border-slate-700 overflow-hidden">
+            <div class="p-4 border-b border-slate-700 flex justify-between items-center">
+                <h3 class="font-bold text-white">Selected Month Transactions</h3>
+                <span class="text-xs text-slate-400" id="txCount">0 Entries</span>
             </div>
-
-            <!-- Table Wrapper -->
-            <div class="overflow-x-auto rounded-xl border border-slate-700/60">
-                <table class="w-full text-left text-xs text-slate-300">
-                    <thead class="bg-slate-900/90 uppercase text-slate-400 font-semibold border-b border-slate-700">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-sm text-slate-300">
+                    <thead class="bg-slate-900 text-slate-400 text-xs uppercase">
                         <tr>
                             <th class="p-3">Date</th>
                             <th class="p-3">Member</th>
                             <th class="p-3">Type</th>
-                            <th class="p-3">Channel / Method</th>
+                            <th class="p-3">Channel</th>
                             <th class="p-3">Amount</th>
                             <th class="p-3">Notes</th>
                             <th class="p-3 text-right">Action</th>
                         </tr>
                     </thead>
-                    <tbody id="transactionTableBody" class="divide-y divide-slate-700/50">
-                        <!-- Populated by JS -->
+                    <tbody id="txTableBody" class="divide-y divide-slate-700">
+                        <!-- Populated via JS -->
                     </tbody>
                 </table>
-                <div id="noDataMsg" class="hidden p-6 text-center text-slate-500 text-sm">
-                    No payment history matches current filter selection.
-                </div>
             </div>
-        </section>
-
+        </div>
     </main>
 
-    <!-- Footer -->
-    <footer class="mt-auto py-4 text-center text-xs text-slate-400 border-t border-slate-800 bg-slate-900">
-        <p>Powered by <span class="font-bold text-indigo-400">USMAN QURESHI</span> with <span class="font-bold text-emerald-400">GEMINI</span></p>
-    </footer>
-
-    <!-- ADD/EDIT TRANSACTION MODAL -->
-    <div id="txModal" class="fixed inset-0 bg-black/75 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
-        <div class="bg-slate-800 border border-slate-700 rounded-2xl max-w-md w-full p-5 shadow-2xl space-y-4 relative">
-            <button onclick="closeTransactionModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white text-lg">
-                <i class="fa-solid fa-xmark"></i>
-            </button>
-
-            <h3 class="text-base font-bold text-white flex items-center gap-2">
-                <i class="fa-solid fa-money-bill-transfer text-indigo-400"></i> Add New Payment
-            </h3>
-
-            <form id="txForm" onsubmit="handleSaveTransaction(event)" class="space-y-3">
-                <!-- Member Selection -->
+    <!-- Modal: Add Transaction -->
+    <div id="addTxModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4">
+        <div class="bg-slate-800 border border-slate-700 w-full max-w-md rounded-xl p-6 shadow-2xl">
+            <div class="flex justify-between items-center mb-4 border-b border-slate-700 pb-3">
+                <h3 class="text-lg font-bold text-white">Add New Transaction</h3>
+                <button onclick="closeAddTransactionModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <form id="txForm" onsubmit="saveTransaction(event)" class="space-y-4">
                 <div>
-                    <label class="block text-xs font-semibold text-slate-400 mb-1">Select Member</label>
-                    <select id="txMemberId" required class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-xs text-slate-100 focus:outline-none focus:border-indigo-500">
-                        <!-- JS populated (Hasham, Waleed, Shan, Asad, Abdul, Shehroz) -->
+                    <label class="block text-xs font-semibold text-slate-300 mb-1">Member Name</label>
+                    <select id="txMember" required class="w-full bg-slate-900 border border-slate-600 rounded-lg p-2 text-white text-sm">
+                        <!-- Member Options -->
                     </select>
                 </div>
-
-                <!-- Payment Type: IN or OUT -->
-                <div>
-                    <label class="block text-xs font-semibold text-slate-400 mb-1">Payment Type</label>
-                    <div class="grid grid-cols-2 gap-2">
-                        <label class="flex items-center justify-center p-2.5 rounded-lg border border-slate-700 bg-slate-900 cursor-pointer has-[:checked]:bg-emerald-600/20 has-[:checked]:border-emerald-500 text-xs">
-                            <input type="radio" name="txType" value="IN" checked class="hidden">
-                            <span class="text-emerald-400 font-semibold flex items-center gap-1.5">
-                                <i class="fa-solid fa-arrow-down"></i> Payment IN (Received)
-                            </span>
-                        </label>
-                        <label class="flex items-center justify-center p-2.5 rounded-lg border border-slate-700 bg-slate-900 cursor-pointer has-[:checked]:bg-rose-600/20 has-[:checked]:border-rose-500 text-xs">
-                            <input type="radio" name="txType" value="OUT" class="hidden">
-                            <span class="text-rose-400 font-semibold flex items-center gap-1.5">
-                                <i class="fa-solid fa-arrow-up"></i> Payment OUT (Refund)
-                            </span>
-                        </label>
-                    </div>
-                </div>
-
-                <!-- Date & Amount -->
-                <div class="grid grid-cols-2 gap-2">
+                <div class="grid grid-cols-2 gap-3">
                     <div>
-                        <label class="block text-xs font-semibold text-slate-400 mb-1">Date</label>
-                        <input type="date" id="txDate" required class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-xs text-slate-100 focus:outline-none focus:border-indigo-500">
+                        <label class="block text-xs font-semibold text-slate-300 mb-1">Transaction Type</label>
+                        <select id="txType" required class="w-full bg-slate-900 border border-slate-600 rounded-lg p-2 text-white text-sm">
+                            <option value="IN">Payment IN (Received)</option>
+                            <option value="OUT">Payment OUT (Expense/Return)</option>
+                        </select>
                     </div>
                     <div>
-                        <label class="block text-xs font-semibold text-slate-400 mb-1">Amount (PKR)</label>
-                        <input type="number" id="txAmount" placeholder="e.g. 5000" min="1" required class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-xs text-slate-100 focus:outline-none focus:border-indigo-500">
+                        <label class="block text-xs font-semibold text-slate-300 mb-1">Date</label>
+                        <input type="date" id="txDate" required class="w-full bg-slate-900 border border-slate-600 rounded-lg p-2 text-white text-sm">
                     </div>
                 </div>
-
-                <!-- Payment Channel / Method (Cash, JazzCash, EasyPaisa & 4 Banks) -->
                 <div>
-                    <label class="block text-xs font-semibold text-slate-400 mb-1">Payment Method / Account</label>
-                    <select id="txMethod" required class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-xs text-slate-100 focus:outline-none focus:border-indigo-500">
+                    <label class="block text-xs font-semibold text-slate-300 mb-1">Payment Method / Channel</label>
+                    <select id="txChannel" required class="w-full bg-slate-900 border border-slate-600 rounded-lg p-2 text-white text-sm">
                         <option value="Cash">Cash</option>
                         <option value="JazzCash">JazzCash</option>
                         <option value="EasyPaisa">EasyPaisa</option>
-                        <option value="Bank Account 1">Bank Account 1</option>
-                        <option value="Bank Account 2">Bank Account 2</option>
-                        <option value="Bank Account 3">Bank Account 3</option>
-                        <option value="Bank Account 4">Bank Account 4</option>
+                        <option value="Bank 1">Bank Account 1</option>
+                        <option value="Bank 2">Bank Account 2</option>
+                        <option value="Bank 3">Bank Account 3</option>
+                        <option value="Bank 4">Bank Account 4</option>
                     </select>
                 </div>
-
-                <!-- Remarks -->
                 <div>
-                    <label class="block text-xs font-semibold text-slate-400 mb-1">Notes / Detail (Optional)</label>
-                    <input type="text" id="txNotes" placeholder="e.g. Monthly installment" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-xs text-slate-100 focus:outline-none focus:border-indigo-500">
+                    <label class="block text-xs font-semibold text-slate-300 mb-1">Amount (PKR)</label>
+                    <input type="number" id="txAmount" min="1" required placeholder="e.g. 5000" class="w-full bg-slate-900 border border-slate-600 rounded-lg p-2 text-white text-sm">
                 </div>
-
-                <div class="pt-2 flex justify-end gap-2">
-                    <button type="button" onclick="closeTransactionModal()" class="px-4 py-2 bg-slate-700 hover:bg-slate-600 rounded-lg text-xs font-semibold text-slate-300">
-                        Cancel
-                    </button>
-                    <button type="submit" class="px-5 py-2 bg-indigo-600 hover:bg-indigo-500 rounded-lg text-xs font-semibold text-white shadow-md shadow-indigo-500/25">
-                        Save Transaction
-                    </button>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1">Remarks / Note (Optional)</label>
+                    <input type="text" id="txNote" placeholder="Monthly fee, slip no, etc." class="w-full bg-slate-900 border border-slate-600 rounded-lg p-2 text-white text-sm">
                 </div>
+                <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-medium py-2 rounded-lg transition shadow-lg shadow-indigo-600/30">Save Transaction</button>
             </form>
         </div>
     </div>
 
-    <!-- EDIT MEMBERS DUES TARGET MODAL -->
-    <div id="membersModal" class="fixed inset-0 bg-black/75 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
-        <div class="bg-slate-800 border border-slate-700 rounded-2xl max-w-lg w-full p-5 shadow-2xl space-y-4 relative">
-            <button onclick="closeManageMembersModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white text-lg">
-                <i class="fa-solid fa-xmark"></i>
-            </button>
-
-            <h3 class="text-base font-bold text-white flex items-center gap-2">
-                <i class="fa-solid fa-user-pen text-indigo-400"></i> Edit Members Target Dues
-            </h3>
-
-            <div id="manageMembersList" class="space-y-2 max-h-[60vh] overflow-y-auto pr-1">
-                <!-- 6 Members List -->
+    <!-- Modal: Manage Members (Up to 25) -->
+    <div id="manageMembersModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4">
+        <div class="bg-slate-800 border border-slate-700 w-full max-w-lg rounded-xl p-6 shadow-2xl">
+            <div class="flex justify-between items-center mb-4 border-b border-slate-700 pb-3">
+                <h3 class="text-lg font-bold text-white">Manage Members (Max 25)</h3>
+                <button onclick="closeManageMembersModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
             </div>
-
-            <div class="pt-2 flex justify-end gap-2">
-                <button type="button" onclick="closeManageMembersModal()" class="px-4 py-2 bg-slate-700 hover:bg-slate-600 rounded-lg text-xs font-semibold text-slate-300">
-                    Cancel
-                </button>
-                <button type="button" onclick="saveMembersConfig()" class="px-5 py-2 bg-emerald-600 hover:bg-emerald-500 rounded-lg text-xs font-semibold text-white shadow">
-                    Save Changes
-                </button>
+            <div class="space-y-4">
+                <div class="flex gap-2">
+                    <input type="text" id="newMemberName" placeholder="Enter Member Name" class="flex-1 bg-slate-900 border border-slate-600 rounded-lg p-2 text-white text-sm">
+                    <input type="number" id="newMemberTarget" placeholder="Target PKR" class="w-28 bg-slate-900 border border-slate-600 rounded-lg p-2 text-white text-sm">
+                    <button onclick="addNewMember()" class="bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-2 rounded-lg text-sm font-medium"><i class="fa-solid fa-plus"></i> Add</button>
+                </div>
+                <div class="max-h-60 overflow-y-auto space-y-2 border-t border-slate-700 pt-3" id="membersListModal">
+                    <!-- Dynamic List -->
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- APP SCRIPT LOGIC -->
+    <!-- Footer Branding -->
+    <footer class="text-center text-xs text-slate-500 mt-12">
+        Powered by USMAN QURESHI with GEMINI
+    </footer>
+
     <script>
-        // Exact 6 Requested Members List
-        const DEFAULT_MEMBERS = [
-            { id: "m1", name: "Hasham", target: 10000 },
-            { id: "m2", name: "Waleed", target: 10000 },
-            { id: "m3", name: "Shan", target: 10000 },
-            { id: "m4", name: "Asad", target: 10000 },
-            { id: "m5", name: "Abdul", target: 10000 },
-            { id: "m6", name: "Shehroz", target: 10000 }
+        // Initial 6 Default Members
+        const defaultMembers = [
+            { id: '1', name: 'Hasham', monthlyTarget: 5000 },
+            { id: '2', name: 'Waleed', monthlyTarget: 5000 },
+            { id: '3', name: 'Shan', monthlyTarget: 5000 },
+            { id: '4', name: 'Asad', monthlyTarget: 5000 },
+            { id: '5', name: 'Abdul', monthlyTarget: 5000 },
+            { id: '6', name: 'Shehroz', monthlyTarget: 5000 }
         ];
 
-        let members = JSON.parse(localStorage.getItem('mpt_members')) || DEFAULT_MEMBERS;
-        let transactions = JSON.parse(localStorage.getItem('mpt_transactions')) || [];
+        let members = JSON.parse(localStorage.getItem('ledger_members')) || defaultMembers;
+        let transactions = JSON.parse(localStorage.getItem('ledger_transactions')) || [];
 
-        // App Init
-        document.addEventListener('DOMContentLoaded', () => {
-            document.getElementById('txDate').valueAsDate = new Date();
-            renderApp();
-        });
+        // Generate 25 Months Dropdown (Current month + past 24 months)
+        function initMonthDropdown() {
+            const select = document.getElementById('monthFilter');
+            select.innerHTML = '';
+            const today = new Date();
 
-        function saveData() {
-            localStorage.setItem('mpt_members', JSON.stringify(members));
-            localStorage.setItem('mpt_transactions', JSON.stringify(transactions));
-        }
-
-        function renderApp() {
-            renderOverviewStats();
-            renderChannelTotals();
-            renderMemberGrid();
-            populateMemberDropdowns();
-            renderTransactions();
-        }
-
-        // Calculate Overview Totals
-        function renderOverviewStats() {
-            const totalTarget = members.reduce((sum, m) => sum + (Number(m.target) || 0), 0);
-            
-            const totalReceived = transactions.reduce((sum, tx) => {
-                if (tx.type === 'IN') return sum + Number(tx.amount);
-                if (tx.type === 'OUT') return sum - Number(tx.amount);
-                return sum;
-            }, 0);
-
-            const remainingBalance = Math.max(0, totalTarget - totalReceived);
-            const percent = totalTarget > 0 ? Math.min(100, Math.round((totalReceived / totalTarget) * 100)) : 0;
-
-            let clearedCount = 0;
-            members.forEach(m => {
-                const memberTotal = getMemberTotal(m.id);
-                if (memberTotal >= m.target && m.target > 0) clearedCount++;
-            });
-
-            document.getElementById('statTotalTarget').innerText = `PKR ${totalTarget.toLocaleString()}`;
-            document.getElementById('statTotalReceived').innerText = `PKR ${totalReceived.toLocaleString()}`;
-            document.getElementById('statTotalBalance').innerText = `PKR ${remainingBalance.toLocaleString()}`;
-            document.getElementById('receivedProgressBar').style.width = `${percent}%`;
-            document.getElementById('statPaidCount').innerText = clearedCount;
-        }
-
-        // Calculate breakdown by payment method/channel
-        function renderChannelTotals() {
-            let cash = 0, jazz = 0, easy = 0, bank = 0;
-
-            transactions.forEach(t => {
-                const val = t.type === 'IN' ? Number(t.amount) : -Number(t.amount);
-                if (t.method === 'Cash') cash += val;
-                else if (t.method === 'JazzCash') jazz += val;
-                else if (t.method === 'EasyPaisa') easy += val;
-                else if (t.method.includes('Bank Account')) bank += val;
-            });
-
-            document.getElementById('channelCashTotal').innerText = `PKR ${cash.toLocaleString()}`;
-            document.getElementById('channelJazzTotal').innerText = `PKR ${jazz.toLocaleString()}`;
-            document.getElementById('channelEasyTotal').innerText = `PKR ${easy.toLocaleString()}`;
-            document.getElementById('channelBankTotal').innerText = `PKR ${bank.toLocaleString()}`;
-        }
-
-        function getMemberTotal(memberId) {
-            return transactions
-                .filter(t => t.memberId === memberId)
-                .reduce((sum, t) => t.type === 'IN' ? sum + Number(t.amount) : sum - Number(t.amount), 0);
-        }
-
-        // Render 6 Member status cards
-        function renderMemberGrid() {
-            const grid = document.getElementById('membersGrid');
-            grid.innerHTML = '';
-
-            members.forEach(m => {
-                const rec = getMemberTotal(m.id);
-                const bal = (m.target || 0) - rec;
-                const isCleared = bal <= 0 && m.target > 0;
-                const badgeClass = isCleared 
-                    ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30' 
-                    : 'bg-amber-500/10 text-amber-400 border-amber-500/30';
-
-                const cardHtml = `
-                    <div class="bg-slate-800/90 border border-slate-700/80 rounded-2xl p-4 flex flex-col justify-between space-y-3 relative overflow-hidden group hover:border-slate-600 transition">
-                        <div class="flex justify-between items-start">
-                            <div>
-                                <h4 class="font-bold text-slate-100 text-sm flex items-center gap-1.5">
-                                    <i class="fa-solid fa-user text-xs text-indigo-400"></i> ${m.name}
-                                </h4>
-                                <p class="text-xs text-slate-400 mt-0.5">Target Dues: <span class="font-medium text-slate-300">PKR ${Number(m.target).toLocaleString()}</span></p>
-                            </div>
-                            <span class="text-[10px] font-semibold px-2 py-0.5 rounded-full border ${badgeClass}">
-                                ${isCleared ? 'Cleared' : 'Pending'}
-                            </span>
-                        </div>
-
-                        <div class="grid grid-cols-2 gap-2 pt-2 border-t border-slate-700/50 text-xs">
-                            <div>
-                                <span class="text-slate-400 block text-[10px]">Received</span>
-                                <span class="font-bold text-emerald-400">PKR ${rec.toLocaleString()}</span>
-                            </div>
-                            <div>
-                                <span class="text-slate-400 block text-[10px]">Remaining</span>
-                                <span class="font-bold ${bal > 0 ? 'text-amber-400' : 'text-slate-400'}">
-                                    PKR ${Math.max(0, bal).toLocaleString()}
-                                </span>
-                            </div>
-                        </div>
-
-                        <button onclick="quickAddForMember('${m.id}')" class="w-full py-1.5 bg-slate-900 hover:bg-indigo-600/20 hover:text-indigo-300 border border-slate-700 rounded-xl text-xs text-slate-300 font-medium transition flex items-center justify-center gap-1.5">
-                            <i class="fa-solid fa-plus text-[10px]"></i> Add Payment
-                        </button>
-                    </div>
-                `;
-                grid.innerHTML += cardHtml;
-            });
-        }
-
-        function populateMemberDropdowns() {
-            const modalSelect = document.getElementById('txMemberId');
-            const filterSelect = document.getElementById('filterMember');
-
-            let optionsHtml = '';
-            members.forEach(m => {
-                optionsHtml += `<option value="${m.id}">${m.name}</option>`;
-            });
-
-            modalSelect.innerHTML = optionsHtml;
-            filterSelect.innerHTML = `<option value="ALL">All Members</option>` + optionsHtml;
-        }
-
-        // Render Transaction Logs
-        function renderTransactions() {
-            const tbody = document.getElementById('transactionTableBody');
-            const noData = document.getElementById('noDataMsg');
-            
-            const filterMember = document.getElementById('filterMember').value;
-            const filterMethod = document.getElementById('filterMethod').value;
-            const filterType = document.getElementById('filterType').value;
-
-            const filtered = transactions.filter(t => {
-                if (filterMember !== 'ALL' && t.memberId !== filterMember) return false;
-                if (filterMethod !== 'ALL' && t.method !== filterMethod) return false;
-                if (filterType !== 'ALL' && t.type !== filterType) return false;
-                return true;
-            });
-
-            filtered.sort((a, b) => new Date(b.date) - new Date(a.date));
-
-            tbody.innerHTML = '';
-
-            if (filtered.length === 0) {
-                noData.classList.remove('hidden');
-                return;
-            } else {
-                noData.classList.add('hidden');
+            for (let i = 0; i < 25; i++) {
+                const d = new Date(today.getFullYear(), today.getMonth() - i, 1);
+                const year = d.getFullYear();
+                const month = String(d.getMonth() + 1).padStart(2, '0');
+                const value = `${year}-${month}`;
+                const label = d.toLocaleString('default', { month: 'long', year: 'numeric' });
+                
+                const option = document.createElement('option');
+                option.value = value;
+                option.textContent = label;
+                select.appendChild(option);
             }
-
-            filtered.forEach(t => {
-                const member = members.find(m => m.id === t.memberId) || { name: 'Unknown' };
-                const isIN = t.type === 'IN';
-
-                let methodIcon = 'fa-money-bill-wave';
-                if (t.method.includes('Bank Account')) methodIcon = 'fa-building-columns';
-                if (t.method === 'JazzCash') methodIcon = 'fa-mobile-screen-button';
-                if (t.method === 'EasyPaisa') methodIcon = 'fa-wallet';
-
-                const tr = document.createElement('tr');
-                tr.className = 'hover:bg-slate-700/30 transition';
-                tr.innerHTML = `
-                    <td class="p-3 text-slate-300 font-mono text-[11px]">${t.date}</td>
-                    <td class="p-3 font-semibold text-slate-200">${member.name}</td>
-                    <td class="p-3">
-                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold ${isIN ? 'bg-emerald-500/10 text-emerald-400' : 'bg-rose-500/10 text-rose-400'}">
-                            <i class="fa-solid ${isIN ? 'fa-arrow-down' : 'fa-arrow-up'}"></i> ${isIN ? 'IN' : 'OUT'}
-                        </span>
-                    </td>
-                    <td class="p-3">
-                        <span class="inline-flex items-center gap-1.5 text-slate-300">
-                            <i class="fa-solid ${methodIcon} text-indigo-400"></i> ${t.method}
-                        </span>
-                    </td>
-                    <td class="p-3 font-bold ${isIN ? 'text-emerald-400' : 'text-rose-400'}">
-                        ${isIN ? '+' : '-'} PKR ${Number(t.amount).toLocaleString()}
-                    </td>
-                    <td class="p-3 text-slate-400 max-w-[150px] truncate">${t.notes || '-'}</td>
-                    <td class="p-3 text-right">
-                        <button onclick="deleteTransaction('${t.id}')" class="text-slate-500 hover:text-rose-400 transition p-1" title="Delete">
-                            <i class="fa-solid fa-trash-can"></i>
-                        </button>
-                    </td>
-                `;
-                tbody.appendChild(tr);
-            });
         }
 
-        // Add Transaction Handler
-        function handleSaveTransaction(e) {
-            e.preventDefault();
-            const memberId = document.getElementById('txMemberId').value;
-            const type = document.querySelector('input[name="txType"]:checked').value;
-            const date = document.getElementById('txDate').value;
-            const amount = parseFloat(document.getElementById('txAmount').value);
-            const method = document.getElementById('txMethod').value;
-            const notes = document.getElementById('txNotes').value.trim();
+        function saveToStorage() {
+            localStorage.setItem('ledger_members', JSON.stringify(members));
+            localStorage.setItem('ledger_transactions', JSON.stringify(transactions));
+            renderDashboard();
+        }
 
-            if (!amount || amount <= 0) return;
+        function renderDashboard() {
+            const selectedMonth = document.getElementById('monthFilter').value;
+            const currentTx = transactions.filter(t => t.date.startsWith(selectedMonth));
 
-            const newTx = {
-                id: 'tx_' + Date.now(),
-                memberId,
-                type,
-                date,
-                amount,
-                method,
-                notes
+            // Populate Members Dropdown in Add Tx Modal
+            const memberSelect = document.getElementById('txMember');
+            memberSelect.innerHTML = members.map(m => `<option value="${m.id}">${m.name}</option>`).join('');
+
+            // Totals
+            let totalTarget = members.length * 5000; // or sum of individual targets
+            let totalReceived = 0;
+            let totalPaidOut = 0;
+
+            const channelTotals = {
+                'Cash': 0, 'JazzCash': 0, 'EasyPaisa': 0,
+                'Bank 1': 0, 'Bank 2': 0, 'Bank 3': 0, 'Bank 4': 0
             };
 
-            transactions.push(newTx);
-            saveData();
-            renderApp();
-            closeTransactionModal();
-            document.getElementById('txForm').reset();
-            document.getElementById('txDate').valueAsDate = new Date();
-        }
-
-        function deleteTransaction(id) {
-            transactions = transactions.filter(t => t.id !== id);
-            saveData();
-            renderApp();
-        }
-
-        // Edit Member Names / Target Dues
-        function openManageMembersModal() {
-            const list = document.getElementById('manageMembersList');
-            list.innerHTML = '';
-
-            members.forEach((m, idx) => {
-                list.innerHTML += `
-                    <div class="flex items-center gap-2 bg-slate-900 p-2.5 rounded-xl border border-slate-700">
-                        <span class="text-xs font-bold text-slate-500 w-5">#${idx + 1}</span>
-                        <input type="text" id="editName_${m.id}" value="${m.name}" placeholder="Member Name" class="flex-grow bg-slate-800 border border-slate-700 rounded-lg p-2 text-xs text-slate-100 focus:outline-none focus:border-indigo-500">
-                        <input type="number" id="editTarget_${m.id}" value="${m.target}" placeholder="Fixed Dues" class="w-28 bg-slate-800 border border-slate-700 rounded-lg p-2 text-xs text-slate-100 focus:outline-none focus:border-indigo-500">
-                    </div>
-                `;
-            });
-
-            document.getElementById('membersModal').classList.remove('hidden');
-            document.getElementById('membersModal').classList.add('flex');
-        }
-
-        function closeManageMembersModal() {
-            document.getElementById('membersModal').classList.add('hidden');
-            document.getElementById('membersModal').classList.remove('flex');
-        }
-
-        function saveMembersConfig() {
-            members.forEach(m => {
-                const nameInput = document.getElementById(`editName_${m.id}`);
-                const targetInput = document.getElementById(`editTarget_${m.id}`);
-                if (nameInput && targetInput) {
-                    m.name = nameInput.value.trim() || m.name;
-                    m.target = parseFloat(targetInput.value) || 0;
+            currentTx.forEach(t => {
+                if(t.type === 'IN') {
+                    totalReceived += Number(t.amount);
+                    if (channelTotals.hasOwnProperty(t.channel)) channelTotals[t.channel] += Number(t.amount);
+                } else {
+                    totalPaidOut += Number(t.amount);
                 }
             });
-            saveData();
-            renderApp();
-            closeManageMembersModal();
+
+            const totalBalance = totalTarget - totalReceived;
+
+            document.getElementById('statTarget').textContent = `PKR ${totalTarget.toLocaleString()}`;
+            document.getElementById('statMemberCount').textContent = `${members.length} Active Members`;
+            document.getElementById('statReceived').textContent = `PKR ${totalReceived.toLocaleString()}`;
+            document.getElementById('statReceivedCount').textContent = `${currentTx.filter(t=>t.type==='IN').length} Payments In`;
+            document.getElementById('statPaidOut').textContent = `PKR ${totalPaidOut.toLocaleString()}`;
+            document.getElementById('statOutCount').textContent = `${currentTx.filter(t=>t.type==='OUT').length} Payments Out`;
+            document.getElementById('statBalance').textContent = `PKR ${totalBalance.toLocaleString()}`;
+
+            // Render Channels
+            const channelContainer = document.getElementById('channelBreakdown');
+            channelContainer.innerHTML = Object.entries(channelTotals).map(([ch, val]) => `
+                <div class="bg-slate-900/60 p-2.5 rounded-lg border border-slate-700/60">
+                    <div class="text-[11px] text-slate-400 truncate">${ch}</div>
+                    <div class="text-sm font-bold text-indigo-400 mt-0.5">PKR ${val.toLocaleString()}</div>
+                </div>
+            `).join('');
+
+            // Render Member Cards
+            const grid = document.getElementById('membersGrid');
+            grid.innerHTML = members.map(m => {
+                const mTx = currentTx.filter(t => t.memberId === m.id);
+                const received = mTx.filter(t => t.type === 'IN').reduce((acc, c) => acc + Number(c.amount), 0);
+                const out = mTx.filter(t => t.type === 'OUT').reduce((acc, c) => acc + Number(c.amount), 0);
+                const target = m.monthlyTarget || 5000;
+                const rem = target - received;
+                
+                let statusBadge = `<span class="px-2 py-0.5 text-[10px] bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 rounded">Paid</span>`;
+                if(rem > 0 && received > 0) statusBadge = `<span class="px-2 py-0.5 text-[10px] bg-amber-500/20 text-amber-400 border border-amber-500/30 rounded">Partial</span>`;
+                else if(rem === target) statusBadge = `<span class="px-2 py-0.5 text-[10px] bg-rose-500/20 text-rose-400 border border-rose-500/30 rounded">Pending</span>`;
+
+                return `
+                    <div class="bg-slate-800 p-4 rounded-xl border border-slate-700 hover:border-slate-600 transition">
+                        <div class="flex justify-between items-start mb-2">
+                            <h3 class="font-bold text-white text-base">${m.name}</h3>
+                            ${statusBadge}
+                        </div>
+                        <div class="grid grid-cols-3 gap-2 text-center bg-slate-900/40 p-2 rounded-lg my-3 text-xs">
+                            <div>
+                                <span class="text-slate-400 block text-[10px]">Target</span>
+                                <span class="font-semibold text-slate-200">Rs ${target.toLocaleString()}</span>
+                            </div>
+                            <div>
+                                <span class="text-emerald-400 block text-[10px]">Received</span>
+                                <span class="font-semibold text-emerald-400">Rs ${received.toLocaleString()}</span>
+                            </div>
+                            <div>
+                                <span class="text-amber-400 block text-[10px]">Balance</span>
+                                <span class="font-semibold text-amber-400">Rs ${rem.toLocaleString()}</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            // Render Table
+            const tbody = document.getElementById('txTableBody');
+            document.getElementById('txCount').textContent = `${currentTx.length} Entries`;
+            tbody.innerHTML = currentTx.map(t => {
+                const member = members.find(m => m.id === t.memberId);
+                const isIN = t.type === 'IN';
+                return `
+                    <tr class="hover:bg-slate-750">
+                        <td class="p-3 text-xs text-slate-400">${t.date}</td>
+                        <td class="p-3 font-medium text-white">${member ? member.name : 'Unknown'}</td>
+                        <td class="p-3">
+                            <span class="px-2 py-0.5 text-[11px] font-semibold rounded ${isIN ? 'bg-emerald-500/20 text-emerald-400' : 'bg-rose-500/20 text-rose-400'}">
+                                ${t.type}
+                            </span>
+                        </td>
+                        <td class="p-3 text-slate-300 text-xs">${t.channel}</td>
+                        <td class="p-3 font-semibold ${isIN ? 'text-emerald-400' : 'text-rose-400'}">PKR ${Number(t.amount).toLocaleString()}</td>
+                        <td class="p-3 text-slate-400 text-xs">${t.note || '-'}</td>
+                        <td class="p-3 text-right">
+                            <button onclick="deleteTx('${t.id}')" class="text-slate-500 hover:text-rose-400 transition"><i class="fa-solid fa-trash"></i></button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
         }
 
-        function openTransactionModal() {
-            document.getElementById('txModal').classList.remove('hidden');
-            document.getElementById('txModal').classList.add('flex');
+        // Add Transaction
+        function openAddTransactionModal() {
+            document.getElementById('txDate').value = new Date().toISOString().split('T')[0];
+            document.getElementById('addTxModal').classList.remove('hidden');
+        }
+        function closeAddTransactionModal() {
+            document.getElementById('addTxModal').classList.add('hidden');
+        }
+        function saveTransaction(e) {
+            e.preventDefault();
+            const newTx = {
+                id: Date.now().toString(),
+                memberId: document.getElementById('txMember').value,
+                type: document.getElementById('txType').value,
+                date: document.getElementById('txDate').value,
+                channel: document.getElementById('txChannel').value,
+                amount: document.getElementById('txAmount').value,
+                note: document.getElementById('txNote').value
+            };
+            transactions.unshift(newTx);
+            saveToStorage();
+            closeAddTransactionModal();
+            document.getElementById('txForm').reset();
+        }
+        function deleteTx(id) {
+            if(confirm('Are you sure you want to delete this payment record?')) {
+                transactions = transactions.filter(t => t.id !== id);
+                saveToStorage();
+            }
         }
 
-        function closeTransactionModal() {
-            document.getElementById('txModal').classList.add('hidden');
-            document.getElementById('txModal').classList.remove('flex');
+        // Manage Members Modal
+        function openManageMembersModal() {
+            renderMembersModalList();
+            document.getElementById('manageMembersModal').classList.remove('hidden');
         }
-
-        function quickAddForMember(memberId) {
-            openTransactionModal();
-            document.getElementById('txMemberId').value = memberId;
+        function closeManageMembersModal() {
+            document.getElementById('manageMembersModal').classList.add('hidden');
         }
-
-        // Export Excel Functionality
-        function exportToExcel() {
-            if (transactions.length === 0) {
-                alert("No transaction entries available to export.");
+        function renderMembersModalList() {
+            const list = document.getElementById('membersListModal');
+            list.innerHTML = members.map((m, idx) => `
+                <div class="flex items-center justify-between bg-slate-900 p-2.5 rounded-lg border border-slate-700">
+                    <span class="text-sm font-medium text-white">${idx + 1}. ${m.name} (Rs ${m.monthlyTarget || 5000})</span>
+                    ${members.length > 1 ? `<button onclick="removeMember('${m.id}')" class="text-rose-400 text-xs hover:underline">Remove</button>` : ''}
+                </div>
+            `).join('');
+        }
+        function addNewMember() {
+            if(members.length >= 25) {
+                alert('Maximum 25 members limit reached!');
                 return;
             }
+            const name = document.getElementById('newMemberName').value.trim();
+            const target = Number(document.getElementById('newMemberTarget').value) || 5000;
+            if(!name) return;
 
-            const exportData = transactions.map(t => {
-                const member = members.find(m => m.id === t.memberId) || { name: 'Unknown' };
+            members.push({ id: Date.now().toString(), name: name, monthlyTarget: target });
+            document.getElementById('newMemberName').value = '';
+            document.getElementById('newMemberTarget').value = '';
+            renderMembersModalList();
+            saveToStorage();
+        }
+        function removeMember(id) {
+            if(confirm('Remove this member?')) {
+                members = members.filter(m => m.id !== id);
+                renderMembersModalList();
+                saveToStorage();
+            }
+        }
+
+        // Excel Export
+        function exportToExcel() {
+            const data = transactions.map(t => {
+                const m = members.find(mem => mem.id === t.memberId);
                 return {
-                    "Date": t.date,
-                    "Member Name": member.name,
-                    "Payment Type": t.type === 'IN' ? 'Payment IN (Received)' : 'Payment OUT',
-                    "Payment Channel": t.method,
-                    "Amount (PKR)": t.amount,
-                    "Notes": t.notes || ''
+                    Date: t.date,
+                    Member: m ? m.name : 'Unknown',
+                    Type: t.type,
+                    Channel: t.channel,
+                    Amount: t.amount,
+                    Note: t.note
                 };
             });
-
-            const worksheet = XLSX.utils.json_to_sheet(exportData);
-            const workbook = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(workbook, worksheet, "Payment Ledger");
-            
-            XLSX.writeFile(workbook, `Payment_Tracker_Export_${new Date().toISOString().slice(0,10)}.xlsx`);
+            const ws = XLSX.utils.json_to_sheet(data);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Monthly Ledger");
+            XLSX.writeFile(wb, "Payment_Ledger_25Months.xlsx");
         }
+
+        // Init
+        initMonthDropdown();
+        renderDashboard();
     </script>
 </body>
 </html>
