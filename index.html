@@ -233,7 +233,6 @@
     </footer>
 
     <script>
-        // Initial 6 Default Members with 0 Monthly Target
         const defaultMembers = [
             { id: '1', name: 'Hasham', monthlyTarget: 0 },
             { id: '2', name: 'Waleed', monthlyTarget: 0 },
@@ -246,13 +245,12 @@
         let members = JSON.parse(localStorage.getItem('ledger_members')) || defaultMembers;
         let transactions = JSON.parse(localStorage.getItem('ledger_transactions')) || [];
 
-        // Generate 25 Months Dropdown: Nov 2026 to Nov 2028
         function initMonthDropdown() {
             const select = document.getElementById('monthFilter');
             select.innerHTML = '';
             
-            const startDate = new Date(2026, 10, 1); // Nov 2026
-            const endDate = new Date(2028, 10, 1);   // Nov 2028 (25 months total)
+            const startDate = new Date(2026, 10, 1);
+            const endDate = new Date(2028, 10, 1);
 
             let curr = new Date(endDate);
             while (curr >= startDate) {
@@ -280,11 +278,9 @@
             const selectedMonth = document.getElementById('monthFilter').value;
             const currentTx = transactions.filter(t => t.date.startsWith(selectedMonth));
 
-            // Populate Members Dropdown in Modal
             const memberSelect = document.getElementById('txMember');
             memberSelect.innerHTML = members.map(m => `<option value="${m.id}">${m.name}</option>`).join('');
 
-            // Calculate Totals
             let totalTarget = members.reduce((acc, m) => acc + Number(m.monthlyTarget || 0), 0);
             let totalReceived = 0;
             let totalPaidOut = 0;
@@ -313,7 +309,6 @@
             document.getElementById('statOutCount').textContent = `${currentTx.filter(t=>t.type==='OUT').length} OUT Entries`;
             document.getElementById('statBalance').textContent = `PKR ${netBalance.toLocaleString()}`;
 
-            // Render Channels
             const channelContainer = document.getElementById('channelBreakdown');
             channelContainer.innerHTML = Object.entries(channelTotals).map(([ch, val]) => `
                 <div class="bg-slate-950 p-2.5 rounded-lg border border-slate-800">
@@ -322,7 +317,6 @@
                 </div>
             `).join('');
 
-            // Render Member Cards
             const grid = document.getElementById('membersGrid');
             grid.innerHTML = members.map(m => {
                 const mTx = currentTx.filter(t => t.memberId === m.id);
@@ -354,7 +348,6 @@
                 `;
             }).join('');
 
-            // Render Transactions Table
             const tbody = document.getElementById('txTableBody');
             document.getElementById('txCount').textContent = `${currentTx.length} Entries`;
             tbody.innerHTML = currentTx.map(t => {
@@ -381,7 +374,6 @@
             }).join('');
         }
 
-        // Add / Edit Transaction
         function openAddTxModal() {
             document.getElementById('editTxId').value = '';
             document.getElementById('txModalTitle').textContent = 'Add Transaction';
@@ -435,7 +427,6 @@
             }
         }
 
-        // Manage Members
         function openManageMembersModal() {
             renderMembersModalList();
             document.getElementById('manageMembersModal').classList.remove('hidden');
@@ -485,7 +476,6 @@
             }
         }
 
-        // Floating Calculator Functions
         function toggleCalculator() {
             document.getElementById('calculatorModal').classList.toggle('hidden');
         }
@@ -513,7 +503,6 @@
             }
         }
 
-        // Excel Export
         function exportToExcel() {
             const data = transactions.map(t => {
                 const m = members.find(mem => mem.id === t.memberId);
@@ -532,7 +521,6 @@
             XLSX.writeFile(wb, "Payment_Ledger_Nov2026_Nov2028.xlsx");
         }
 
-        // Init App
         initMonthDropdown();
         renderDashboard();
     </script>
